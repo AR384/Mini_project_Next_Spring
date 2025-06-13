@@ -1,56 +1,118 @@
 'use client'
 
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button01 from "@/components/etc/Button01";
 import LoginModal from "../Login/LoginModal";
 import { useAtom } from "jotai";
 import { Logininfo } from "@/type/logininfo";
 import { isLoginAtom } from "@/atoms/IsLoginAtom";
 import axios from "axios";
+import { useForm, useWatch } from "react-hook-form";
+import { redirect, useRouter } from "next/navigation";
+
 
 export default function Nav() {
+    const route = useRouter();
     // 로그인모달창 처리
     const [open,setOpen] = useState(false)
+    // 모델선택모달창 처리
+    const [chooseModel,setchooseModel] = useState(false)
     //로그인 상태 관리
     const [loginstate,setloginstate] = useAtom<Logininfo>(isLoginAtom)
-    //이미지 업로드 테스트
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const onButtonClick = (e : React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault()
-        fileInputRef.current?.click();
-        console.log(fileInputRef.current)
-    };
-    
-    //로그인 정보 불러오기
+    //로그인 정보 불러오기 & 에러 메세지 처리
     useEffect(()=>{
-            const getUserInfo = async ()=>{
+            //Oauth유저 로그인시 쿠키확인용
+            const checkOauthUser = async()=>{
                 try {
-                    const res  = await axios.get('/api/login/userinfo',{withCredentials:true});
-                    console.log('응답 데이터 : ',res.data);
-                    setloginstate(res.data); 
-                    
-                } catch (error:any) {
-                    console.error("유저 불러오기 실패 Nav : ", error.response?.data?.error);
+                    const res = await axios.get('/api/login/oauth2', { withCredentials: true });
+                    return res.data; // 응답 데이터를 반환 쿠키헤더에서 토큰 읽어서 세션에 저장 할지 물어볼것
+                } catch (error) {
+                    console.error("OAuth2 사용자 정보 가져오기 실패:", error);
+                    return null; // 오류 발생 시 null 반환
                 }
+            }
+            //로그인 정보 불러오기
+            const getUserInfo = async ()=>{
+                const sessionToken = sessionStorage.getItem('jwtToken')?.trim()||""; // DB유저 확인 Session 토큰 확인
+                const oauth2user =await checkOauthUser(); // Oauth2유저 확인 True False
+                //토큰 이나 쿠키가 있으면 로그인 유저 확인
+                if (oauth2user.isOAuthLoggedIn|| sessionToken.length>0){
+                    try {
+                        const res  = await axios.get('/api/login/userinfo',{headers:{Authorization : sessionToken},withCredentials:true});
+                        setloginstate(res.data); 
+                    } catch (error:any) {
+                        console.error("유저 불러오기 실패 Nav : ", error.response?.data?.error);
+                    }
+                }
+            }
+            //다른페이지에서 왔을때 에러 확인후 출력용
+            const params = new URLSearchParams(window.location.search)
+            const errorMessage = params.get("error");
+    
+            if (errorMessage) {
+                alert("결과를 로딩할 수 없음: 서버 문제 확인 필요");
+                redirect('/')
             }
             getUserInfo();
     },[])
-    
-    //로그아웃
+    //로그아웃 api요청 로그아웃에서 세션 토큰 삭제 방식으로 바꿈
     const handleLogout = async () => {
+        sessionStorage.removeItem('jwtToken');
+        setloginstate({
+            isLogin: 'logged-out',
+            nickname: '',
+            logintype: '',
+            role: undefined,
+            username: ''
+        });
+    };
+    //이미지 업로드 테스트
+    const { register, handleSubmit,control } = useForm();
+    const [imagePreview, setImagePreview] = useState("");
+    const imgwatch = useWatch({
+        control,
+        name: "inputimage",  
+    })
+    //이미지 업로드시 프리뷰 생성
+    useEffect(()=>{
+        if (imgwatch && imgwatch.length  >0) {
+            const file = imgwatch[0]
+            setImagePreview(URL.createObjectURL(file))
+        }
+    },[imgwatch])
+    
+    const onSubmit = async (data:any) =>{
+        console.log('데이터' , data)
+        //const reader = new FileReader(); base64방식으로 인코딩 하면 Json전송가능 하지만 
+        //Base64로 인코딩하면 원래 이미지보다 약 33% 용량 증가  고해상도 사진 전송 적합
+        //대용량 이미지 여러 개를 보내면 네트워크와 메모리 사용이 커짐 
+        const formData = new FormData();
+        // inputimage는 File[] 타입이니까 [0]을 사용
+        formData.append("image", data.inputimage[0]); 
+        
         try {
-            const res = await axios.post('api/logout',{},{withCredentials:true})
-            if (res.status===200) {
-                setloginstate({isLogin:'logged-out'})
+            const response = await axios.post('api/imgTopython',formData,
+                {
+                    headers : {"Content-Type":'multipart/form-data'},
+                    withCredentials : true
+                })
+            route.push(`/resultpage/${response.data.springresponse.jobid}`)
+            if (response.status === 200) {
+                console.log(response.data)
+                console.log(response.data.springresponse)
+                console.log(response.data.springresponse.jobid)
+                
             }
+            
         } catch (error:any) {
             console.log(error.response.data.error)
+            console.log(error.response)
         }
-    };
-    
+    }
+ 
     return (
-        <div className="bg-pink-800 space-y-1">
+        <div className="bg-pink-800 space-y-2 space-x-3 flex flex-col items-center justify-center">
             
             <div className="flex flex-row flex-wrap gap-2">
                 <Link href="/about">페이지1</Link>
@@ -65,13 +127,18 @@ export default function Nav() {
                 </>
                 )}
             </div>
-            <form action="/" method="post" >
-                <input ref={fileInputRef} className="bg-fuchsia-400" type="file" name="file" accept="image/*" capture="environment" style={{display:"none"}}/>
-                    <button className="bg-fuchsia-400 px-4 py-2" onClick={onButtonClick}>
-                        사진업로드
-                    </button>
-                <button type="submit">업로드</button>
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row gap-2">
+
+                <input {...register('inputimage')}className="bg-fuchsia-400" type="file" id="fileInput" accept="image/*"  style={{display:"none"}}/>
+                <label htmlFor="fileInput" className="bg-fuchsia-400 px-4 py-2">
+                    {/* htmlFor가 id태그 트리거 */}
+                    사진 선택
+                </label>
+                <button className="bg-fuchsia-400 px-4 py-2" type="submit">
+                    서버로 전송
+                </button>
             </form>
+            {imagePreview && <img src={imagePreview} alt="preview" />}
             <div>로그인 유저 : {loginstate.nickname}</div>
             <div>로그인 타입 : {loginstate.logintype}</div>
             <div>로그인 권한 : {loginstate.role}</div>

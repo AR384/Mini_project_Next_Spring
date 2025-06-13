@@ -92,16 +92,17 @@ public class SecurityController {
 		}
 		Map<String, Object> userInfo = new HashMap<>();
 		 
-		if (auth.getPrincipal() instanceof User user ) {
+		if (auth.getPrincipal() instanceof OAuth2User oAuth2User ) {
+//			String email = oAuth2User.getAttribute("email");
+			userInfo.put("logintype", "Oauth2등록유저");
+		}else if (auth.getPrincipal() instanceof User user ) {
 			userInfo.put("logintype", "DB등록유저");
 			Members member = memberService.getMembers(user.getUsername());
 			userInfo.put("username", member.getUsername());
 			userInfo.put("nickname", member.getNickname());
 			userInfo.put("role", member.getRole());
 			userInfo.put("isLogin", "logged-in");
-		}else if (auth.getPrincipal() instanceof OAuth2User oAuth2User) {
-			String email = oAuth2User.getAttribute("email");
-			userInfo.put("logintype", "Oauth2등록유저");
+
 		}
 		return ResponseEntity.ok(userInfo);
 	}

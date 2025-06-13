@@ -3,12 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
     const sptingurl = process.env.SPRING_API;
-    const logname = "넥스트 서버 | api log | "
-
+    const logname = "넥스트 서버 | api log | login/userinfo : "
+    //jwtToken 가져오기 
+    const token = req.headers.get('authorization') || "";
+    
+    // 쿠키 가져오기 Oauth2 로그인->서버로 요청->토큰발급->쿠키발급->페이지 리로드
+    const cookie = req.headers.get("cookie") || "";
+    
+    console.log(logname,req.headers)
     try {
-        const res = await axios.get(`${sptingurl}/loged-in/user`,{headers : {Cookie:req.headers.get('cookie') || ""}})
-        console.log(logname , "유저정보 쿠키",req.headers.get('cookie'))
-        // console.log(logname , "서버응당",res)
+        const res = await axios.get(`${sptingurl}/loged-in/user`,{headers : {authorization:token,cookie:cookie}})
         return NextResponse.json( res.data, {status : 200});
     } catch (error:any) {
         

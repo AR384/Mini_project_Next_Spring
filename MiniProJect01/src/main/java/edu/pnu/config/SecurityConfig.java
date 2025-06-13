@@ -84,7 +84,8 @@ public class SecurityConfig {
 		CorsConfiguration cfg = new CorsConfiguration();
 //		cfg.addAllowedOrigin("http://localhost:3000");  //set은 여러번 기존에 추가된 오리진 덮어씀
 		cfg.setAllowedOrigins(Arrays.asList(
-			    "http://localhost:3000"
+			    "http://localhost:3000",
+				"http://10.125.121.185:8000"
 //			    "https://kdtminiproject.myvnc.com:3000" //집에 서버 접속 안해도되서 주석해둠 넥스트에서 api로 접근하기 때문에 같은 로컬로 접속하는거라 안함
 			));
 		cfg.addAllowedHeader(CorsConfiguration.ALL);

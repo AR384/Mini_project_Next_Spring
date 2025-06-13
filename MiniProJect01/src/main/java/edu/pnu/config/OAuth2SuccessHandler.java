@@ -64,7 +64,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
 		jwtCookie.setHttpOnly(true);
 		jwtCookie.setPath("/");
 		jwtCookie.setDomain("localhost");
-		jwtCookie.setMaxAge((int)JWTUtil.ACCESS_TOKEN_MESC);
+		jwtCookie.setMaxAge(5);
 		response.addCookie(jwtCookie);
 		response.sendRedirect("http://localhost:3000");
 		log.info("OAuth2 인증 성공 종료 ");

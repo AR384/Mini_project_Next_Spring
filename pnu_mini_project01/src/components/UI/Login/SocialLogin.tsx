@@ -11,6 +11,7 @@ export default function SocialLogin() {
         try {
             const res = await axios.post('/api/login/oauth2', { provider, returnTo: window.location.origin, }, { withCredentials: true });
             if (res.data && res.data.redirectUrl) {
+                //Oauth2는 페이지 리다이렉팅을 해줘야함
                 window.location.href = res.data.redirectUrl;
             }
         } catch (error) {
