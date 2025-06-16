@@ -9,11 +9,11 @@ import { Logininfo } from "@/type/logininfo";
 import { isLoginAtom } from "@/atoms/IsLoginAtom";
 import axios from "axios";
 import { useForm, useWatch } from "react-hook-form";
-import { redirect, useRouter } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 
 
 export default function Nav() {
-    const route = useRouter();
+
     // 로그인모달창 처리
     const [open,setOpen] = useState(false)
     // 모델선택모달창 처리
@@ -41,8 +41,24 @@ export default function Nav() {
                     try {
                         const res  = await axios.get('/api/login/userinfo',{headers:{Authorization : sessionToken},withCredentials:true});
                         setloginstate(res.data); 
+                        if (res.data.message) {
+
+                        }
                     } catch (error:any) {
                         console.error("유저 불러오기 실패 Nav : ", error.response?.data?.error);
+                        const errmsg = error.response?.data?.error.message
+                        const keyword = 'The Token has expired on'
+                        if (errmsg && JSON.stringify(errmsg).includes(keyword)) {
+                            console.log("getUserInfo - 토큰만료");
+                            sessionStorage.removeItem('jwtToken');
+                            setloginstate({
+                                isLogin: 'logged-out',
+                                nickname: '',
+                                logintype: '',
+                                role: undefined,
+                                username: ''
+                            });
+                        }
                     }
                 }
             }
@@ -55,7 +71,7 @@ export default function Nav() {
                 redirect('/')
             }
             getUserInfo();
-    },[])
+    },[loginstate.isLogin])
     //로그아웃 api요청 로그아웃에서 세션 토큰 삭제 방식으로 바꿈
     const handleLogout = async () => {
         sessionStorage.removeItem('jwtToken');
@@ -66,51 +82,9 @@ export default function Nav() {
             role: undefined,
             username: ''
         });
-    };
-    //이미지 업로드 테스트
-    const { register, handleSubmit,control } = useForm();
-    const [imagePreview, setImagePreview] = useState("");
-    const imgwatch = useWatch({
-        control,
-        name: "inputimage",  
-    })
-    //이미지 업로드시 프리뷰 생성
-    useEffect(()=>{
-        if (imgwatch && imgwatch.length  >0) {
-            const file = imgwatch[0]
-            setImagePreview(URL.createObjectURL(file))
-        }
-    },[imgwatch])
-    
-    const onSubmit = async (data:any) =>{
-        console.log('데이터' , data)
-        //const reader = new FileReader(); base64방식으로 인코딩 하면 Json전송가능 하지만 
-        //Base64로 인코딩하면 원래 이미지보다 약 33% 용량 증가  고해상도 사진 전송 적합
-        //대용량 이미지 여러 개를 보내면 네트워크와 메모리 사용이 커짐 
-        const formData = new FormData();
-        // inputimage는 File[] 타입이니까 [0]을 사용
-        formData.append("image", data.inputimage[0]); 
         
-        try {
-            const response = await axios.post('api/imgTopython',formData,
-                {
-                    headers : {"Content-Type":'multipart/form-data'},
-                    withCredentials : true
-                })
-            route.push(`/resultpage/${response.data.springresponse.jobid}`)
-            if (response.status === 200) {
-                console.log(response.data)
-                console.log(response.data.springresponse)
-                console.log(response.data.springresponse.jobid)
-                
-            }
-            
-        } catch (error:any) {
-            console.log(error.response.data.error)
-            console.log(error.response)
-        }
-    }
- 
+    };
+
     return (
         <div className="bg-pink-800 space-y-2 space-x-3 flex flex-col items-center justify-center">
             
@@ -127,18 +101,8 @@ export default function Nav() {
                 </>
                 )}
             </div>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row gap-2">
+            
 
-                <input {...register('inputimage')}className="bg-fuchsia-400" type="file" id="fileInput" accept="image/*"  style={{display:"none"}}/>
-                <label htmlFor="fileInput" className="bg-fuchsia-400 px-4 py-2">
-                    {/* htmlFor가 id태그 트리거 */}
-                    사진 선택
-                </label>
-                <button className="bg-fuchsia-400 px-4 py-2" type="submit">
-                    서버로 전송
-                </button>
-            </form>
-            {imagePreview && <img src={imagePreview} alt="preview" />}
             <div>로그인 유저 : {loginstate.nickname}</div>
             <div>로그인 타입 : {loginstate.logintype}</div>
             <div>로그인 권한 : {loginstate.role}</div>

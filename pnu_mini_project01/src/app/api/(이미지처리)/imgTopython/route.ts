@@ -46,7 +46,7 @@ export async function POST(req:NextRequest) {
     const sptingurl = process.env.SPRING_API;
     try {
         const res = await axios.post(
-            `${sptingurl}/imgToPython`,
+            `${sptingurl}/api/inference`,
             serverFormData,
             {
                 headers:{
@@ -54,8 +54,8 @@ export async function POST(req:NextRequest) {
                 }
             }
         )
-        console.log(res.data)
-        return NextResponse.json({message: '파일전송성공', springresponse:res.data})
+        console.log('${sptingurl}/api/inference 응답 =>',res.data)
+        return NextResponse.json({spring_response:res.data})
     } catch (error:any) {
         console.error("Spring 서버 전송 실패", error.message, "서버 응답 데이터 : " ,error.response.data);
         return NextResponse.json({ error: error.message }, { status: 500 });

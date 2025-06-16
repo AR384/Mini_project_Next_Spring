@@ -3,6 +3,9 @@ import ButtonCoponent from "./Buttons";
 import Button01 from "@/components/etc/Button01";
 import { Metadata } from "next";
 import Link from "next/link";
+import AboutCP from "./AboutCP";
+import PolygonCanvas from "./AboutCP";
+import POPaa from "./POPaa";
 
 
 export const metadata: Metadata = {
@@ -21,6 +24,10 @@ export default async function about() {
                 <Button01 caption="bt01" bg_color="blue"/>
                 <Link href='/'>돌아가기</Link>
             </h1>
+            <div className="flex flex-col justify-center items-center">
+                <POPaa/>
+            </div>
+            
         </div>
     );
 }

@@ -1,11 +1,15 @@
+import ImageSendingForm from "@/components/UI/ImageForm/ImageSendingForm";
 import Nav from "@/components/UI/Nav/Nav";
 import Image from "next/image";
+
 
 export default function Home() {
   return (
     <div className="grid grid-rows-[auto_1fr_auto items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+
       <Nav/>
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <ImageSendingForm/>
         <Image
           className="dark"
           src="https://victoriabuzz.com/wp-content/uploads/2020/05/IMG_1890-e1655320432455.jpg"

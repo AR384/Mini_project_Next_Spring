@@ -3,13 +3,16 @@ import { isLoginAtom } from "@/atoms/IsLoginAtom";
 import { Logininfo } from "@/type/logininfo";
 import axios from "axios";
 import { useAtom } from "jotai";
+import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 export default function DefalutLogin( { onclose } : { onclose : ()=>void}) {
     
     const { register , handleSubmit } = useForm();
-    const [, setLoginSate] = useAtom<Logininfo>(isLoginAtom)
-    
+    const [, setLoginSate] = useAtom<Logininfo>(isLoginAtom);
+    const router = useRouter();
     // 로그인 프로세스
     const onSubmit = async ( data : any ) => {
         try {
@@ -19,9 +22,11 @@ export default function DefalutLogin( { onclose } : { onclose : ()=>void}) {
                 const cookie = response.data['set-cookie'][0]
                 const token = cookie.split(";")[0].split('=')[1]
                 sessionStorage.setItem('jwtToken', `Bearer ${token}`)
-                alert("로그인성공")
-                onclose()
-                window.location.href='/'
+                toast.success("로그인성공",{autoClose: 1000})
+                setTimeout(() => {
+                    onclose(); // 모달 닫기
+                    router.push('/'); // 홈으로 자연스럽게 이동
+                }, 1000);
             }
         } catch (error:any) {
             console.log(error.response.data.error)

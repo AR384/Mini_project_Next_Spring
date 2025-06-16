@@ -11,7 +11,7 @@ export default function LoginModal( { onclose } : { onclose : () => void} ) {
     const [formType, setFormType] = useState<'login' | 'register'>('login');
     
     return (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
             <div className="bg-black w-200 h-[600px]">
                 <div className="flex flex-row p-2 gap-2 ">
                     <Button01 caption="로그인" bg_color={formType === 'login' ? 'orange' : 'blue'} onClick={ () => setFormType('login')} />

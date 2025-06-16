@@ -14,15 +14,17 @@ export const metadata: Metadata = {
 };
 
 // 서버에서 폴링을 수행하는 함수
-async function GetResult(jobid: string, retries = 5, interval = 4000): Promise<ResultImage | null> {
+async function GetResult(jobid: string, retries = 5, interval = 4000): Promise<ApiResponseDTO<ImageProcessResultDTO> | null> {
     const springurl = process.env.SPRING_API;
+    await new Promise(res => setTimeout(res, 2000));
+    
     for (let i = 0; i < retries; i++) {
         try {
             console.log(`🔁 폴링 시도 ${i + 1}`);
-            const res = await axios.get<ResultImage>(`${springurl}/imgresult/${jobid}`);
+            const res = await axios.get<ApiResponseDTO<ImageProcessResultDTO>>(`${springurl}/api/inference/${jobid}/result`);
             if (res.data.status === 'done') {
-                console.log(res.data)
-                console.log('✅ 결과 도착');
+                console.log()
+                console.log('✅ 결과 도착',res.data);
                 return res.data;
             }
         } catch (err) {
@@ -34,7 +36,7 @@ async function GetResult(jobid: string, retries = 5, interval = 4000): Promise<R
 }
 
 export default async function Page({ params }: { params: { jobid: string } }) {
-    const {jobid} = await params; // ✅ await 제거
+    const {jobid} = await params; 
     const result = await GetResult(jobid);
     
     if (!result) {
@@ -45,11 +47,11 @@ export default async function Page({ params }: { params: { jobid: string } }) {
     return (
         <div className="flex flex-col justify-center items-center gap-1.5 p-2">
             
-            <text className="flex flex-col justify-center items-center">
+            <div className="flex flex-col justify-center items-center">
                 <h1>{result.message}</h1>
                 <p>화면에서 선택해주세요</p>
-            </text>
-            <ResultRender result={result} jobid={jobid} /> 
+            </div>
+            <ResultRender apiRespone={result} jobid={jobid} /> 
         </div>
     );
 }

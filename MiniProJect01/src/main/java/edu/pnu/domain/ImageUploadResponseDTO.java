@@ -1,7 +1,5 @@
 package edu.pnu.domain;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,8 +11,7 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImageSelectDTO {
+public class ImageUploadResponseDTO {
 	private String jobid;
-	private List<Integer> selectedIdx;
-	private List<String> selectedname;
+	private String username;
 }

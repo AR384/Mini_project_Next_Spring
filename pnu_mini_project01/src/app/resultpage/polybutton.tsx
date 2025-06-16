@@ -27,8 +27,8 @@ export default function Polybutton({ names, poly, jobid,selectedIdx,setSelectedI
         const getRandomColor = () =>{
             const colors =  [
                 'fill-red-400', 'fill-blue-400', 'fill-green-400', 'fill-yellow-400', 'fill-pink-400',
-                'fill-fuchsia-600', 'fill-orange-600', 'fill-coral-600', 'fill-yellow-600', 'fill-pink-600',
-                'fill-purple-800', 'fill-blue-800', 'fill-amber-600', 'fill-yellow-800', 'fill-pink-800',
+                'fill-fuchsia-600', 'fill-orange-600', 'fill-yellow-600', 'fill-yellow-600', 'fill-pink-600',
+                'fill-purple-800', 'fill-blue-300', 'fill-amber-600', 'fill-yellow-800', 'fill-pink-800',
             ];
             // Fisher-Yates shuffle
             for (let i = colors.length - 1; i > 0; i--) {
