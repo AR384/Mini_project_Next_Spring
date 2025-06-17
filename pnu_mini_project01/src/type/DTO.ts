@@ -19,6 +19,7 @@ interface ImageProcessResultDTO {
     status: string;
     poly: string[];
     names:string[];
+    type:string[];
     viewSize:string[];
 }
 
@@ -26,10 +27,6 @@ interface ImagePermitRequestDTO{
     jobid:string;
     selectedIdx:number[]
     selectedname:string[]
+
 }
 
-interface ImagePermitResponseDTO{
-    jobid:string;
-    selectedIdx:number[]
-    selectedname:string[]
-}

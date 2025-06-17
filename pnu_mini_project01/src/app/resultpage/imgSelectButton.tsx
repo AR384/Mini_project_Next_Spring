@@ -17,9 +17,10 @@ export default function ImgSelectButton({ permitRequest, setSelectedIdx, }:{perm
         console.log("ImgSelectButton - 승인",permitRequest.selectedname)
         try {
             const res = await axios.post('/api/imgPermit',permitRequest,{headers:{"Content-Type":'application/json'},withCredentials:true})
-            console.log("승인 결과 응답",res.data)
+            console.log("✅승인 결과 응답",res.data)
+            console.log(res.data.spring_response.data.body)
             if (res.data.spring_response.status==='200'&&res.status==200) {
-                setpayment(<Payment onclose={() => setpayment(undefined)} jobid={permitRequest.jobid} />)
+                setpayment(<Payment onclose={() => setpayment(undefined)} data={res.data.spring_response.data.body} jobid={permitRequest.jobid} />)
             }
         } catch (error:any) {
             console.error("API 호출 실패:", error.response?.data || error.message)

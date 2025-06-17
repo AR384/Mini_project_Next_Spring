@@ -10,10 +10,10 @@ import { productselected } from "@/styles/productSelection";
 import { toast } from "react-toastify";
 
 
-
 export default function ResultRender({ apiRespone, jobid }: { apiRespone: ApiResponseDTO<ImageProcessResultDTO>; jobid: string }) {
     const [selectedIdx, setSelectedIdx] = useState<number[]>([]);
     const [selectedname, setSelectedname] = useState<string[]>([]);
+    const [selectedtype, setSelectedtype] = useState<string[]>([]);
     const [imwidth, setwidth] = useState<number>();
     const [imheight, setheight] = useState<number>();
     const result = apiRespone.data;
@@ -23,8 +23,9 @@ export default function ResultRender({ apiRespone, jobid }: { apiRespone: ApiRes
             console.log("ResultRender - 최대선택")
             toast.info('모두 선택 하셨습니다.',{autoClose:1000})
         }
-        selectedIdx.map(i=>console.log("ResultRender - 선택한 내용 : ",result.names[i]))
+        selectedIdx.map(i=>console.log("ResultRender - 선택한 내용 : ",result.names[i]," ",result.type[i]))
         setSelectedname(selectedIdx.map(i => result.names[i]))
+        setSelectedtype(selectedIdx.map(i => result.type[i]))
     }, [selectedIdx]);
     
     const imgRef = useRef<HTMLImageElement>(null);
